@@ -38,7 +38,7 @@ __Gradle__
 
 ```
 dependencies {
-    compile "fr.brouillard.oss:cssfx:11.4.0"
+    implementation "fr.brouillard.oss:cssfx:11.4.0"
 }
 ```
 __Modular Java__
@@ -70,7 +70,7 @@ __Gradle__
 
 ```
 dependencies {
-    compile "org.fxmisc.cssfx:cssfx:1.1.1"
+    implementation "org.fxmisc.cssfx:cssfx:1.1.1"
 }
 ```
 
