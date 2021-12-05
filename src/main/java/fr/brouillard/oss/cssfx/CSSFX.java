@@ -40,6 +40,7 @@ import fr.brouillard.oss.cssfx.impl.log.CSSFXLogger;
 import fr.brouillard.oss.cssfx.impl.log.CSSFXLogger.LogLevel;
 
 public class CSSFX {
+    private static boolean isCssFXStarted = false;
     /**
      * Directly start monitoring the CSS of the application using defaults:
      * <ul>
@@ -48,8 +49,12 @@ public class CSSFX {
      * </ul> 
      * @return a Runnable object to stop CSSFX monitoring
      */
-    public static Runnable start() {
-        return new CSSFXConfig().start();
+    synchronized public static Runnable start() {
+        if(!isCssFXStarted) {
+            return new CSSFXConfig().start();
+        } else {
+            return () -> {};
+        }
     }
     
     /**
@@ -192,6 +197,11 @@ public class CSSFX {
          * @return a Runnable object to stop CSSFX monitoring
          */
         public Runnable start() {
+            if(Boolean.getBoolean("cssfx.disable")) {
+                System.out.println("CSSFX was not started, because it's disabled via the system property 'cssfx.disable'");
+                return () -> {};
+            }
+
             if (!CSSFXLogger.isInitialized()) {
                 if (Boolean.getBoolean("cssfx.log")) {
                     LogLevel toActivate = LogLevel.INFO;
