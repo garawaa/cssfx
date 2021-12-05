@@ -224,7 +224,7 @@
         <dependency>
             <groupId>de.sandec</groupId>
             <artifactId>JMemoryBuddy</artifactId>
-            <version>0.1.3</version>
+            <version>0.5.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
