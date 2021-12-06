@@ -27,13 +27,13 @@ import java.util.HashSet;
 public class CleanupDetector {
 
     private static HashSet<WeakReferenceWithRunnable> references = new HashSet<WeakReferenceWithRunnable>();
-    private static ReferenceQueue queue = new ReferenceQueue();;
+    private static ReferenceQueue referenceQueue = new ReferenceQueue();
 
     static {
         Thread cleanupDetectorThread = new Thread(() -> {
             while (true) {
                 try {
-                    WeakReferenceWithRunnable r = (WeakReferenceWithRunnable) queue.remove();
+                    WeakReferenceWithRunnable r = (WeakReferenceWithRunnable) referenceQueue.remove();
                     references.remove(r);
                     r.r.run();
                 } catch (Throwable e) {
@@ -49,7 +49,7 @@ public class CleanupDetector {
      * The runnable gets executed after the object has been collected by the GC.
      */
     public static void onCleanup(Object obj, Runnable r) {
-        onCleanup(new WeakReferenceWithRunnable(obj,r));
+        onCleanup(new WeakReferenceWithRunnable(obj, referenceQueue, r));
     }
     /**
      * This version of the method can be used to provide more information
@@ -64,7 +64,7 @@ public class CleanupDetector {
      */
     public static class WeakReferenceWithRunnable extends WeakReference {
         Runnable r = null;
-        WeakReferenceWithRunnable(Object ref, Runnable r) {
+        WeakReferenceWithRunnable(Object ref, ReferenceQueue queue, Runnable r) {
             super(ref, queue);
             this.r = r;
         }
