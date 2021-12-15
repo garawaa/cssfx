@@ -33,14 +33,15 @@ import javafx.stage.Stage;
 
 import javafx.stage.Window;
 import fr.brouillard.oss.cssfx.api.URIToPathConverter;
-import fr.brouillard.oss.cssfx.impl.ApplicationStages;
 import fr.brouillard.oss.cssfx.impl.CSSFXMonitor;
 import fr.brouillard.oss.cssfx.impl.URIToPathConverters;
 import fr.brouillard.oss.cssfx.impl.log.CSSFXLogger;
 import fr.brouillard.oss.cssfx.impl.log.CSSFXLogger.LogLevel;
 
 public class CSSFX {
+    // prevent multiple global starts of CSSFX
     private static boolean isCssFXStarted = false;
+
     /**
      * Directly start monitoring the CSS of the application using defaults:
      * <ul>
@@ -51,6 +52,7 @@ public class CSSFX {
      */
     synchronized public static Runnable start() {
         if(!isCssFXStarted) {
+            isCssFXStarted = true;
             return new CSSFXConfig().start();
         } else {
             return () -> {};
