@@ -224,7 +224,7 @@
         <dependency>
             <groupId>de.sandec</groupId>
             <artifactId>JMemoryBuddy</artifactId>
-            <version>0.1.3</version>
+            <version>0.5.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -242,7 +242,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.5.2</version>
+            <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

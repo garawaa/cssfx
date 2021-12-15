@@ -84,7 +84,9 @@ Starting monitoring CSS changes in development is as simple as adding one line i
 CSSFX.start()
 ```
 
-Doing so CSSFX will start to track every CSS resource that will be declared on any Scene or Parent in your application. This monitoring will be active for all the Stage that your application will use.  
+Doing so CSSFX will start to track every CSS resource that will be declared on any Scene or Parent in your application. This monitoring will be active for all the Stage that your application will use.
+You can also disable CSSFX by adding the following argument to the JVM: `-Dcssfx.disable=true`.
+
 
 ### Mapping URIs to files on disk
 

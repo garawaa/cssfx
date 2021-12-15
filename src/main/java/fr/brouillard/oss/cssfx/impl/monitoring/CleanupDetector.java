@@ -20,20 +20,20 @@ package fr.brouillard.oss.cssfx.impl.monitoring;
  * #L%
  */
 
-import java.lang.ref.PhantomReference;
+import java.lang.ref.WeakReference;
 import java.lang.ref.ReferenceQueue;
 import java.util.HashSet;
 
 public class CleanupDetector {
 
-    static HashSet<PhantomReferenceWithRunnable> references = new HashSet<PhantomReferenceWithRunnable>();
-    static ReferenceQueue queue = new ReferenceQueue();;
+    private static HashSet<WeakReferenceWithRunnable> references = new HashSet<WeakReferenceWithRunnable>();
+    private static ReferenceQueue referenceQueue = new ReferenceQueue();
 
     static {
         Thread cleanupDetectorThread = new Thread(() -> {
             while (true) {
                 try {
-                    PhantomReferenceWithRunnable r = (PhantomReferenceWithRunnable) queue.remove();
+                    WeakReferenceWithRunnable r = (WeakReferenceWithRunnable) referenceQueue.remove();
                     references.remove(r);
                     r.r.run();
                 } catch (Throwable e) {
@@ -45,18 +45,28 @@ public class CleanupDetector {
         cleanupDetectorThread.start();
     }
 
-    static PhantomReferenceWithRunnable pr = null;
+    /**
+     * The runnable gets executed after the object has been collected by the GC.
+     */
     public static void onCleanup(Object obj, Runnable r) {
-        PhantomReferenceWithRunnable phantomref = new PhantomReferenceWithRunnable(obj,queue,r);
-        references.add(phantomref);
+        onCleanup(new WeakReferenceWithRunnable(obj, referenceQueue, r));
+    }
+    /**
+     * This version of the method can be used to provide more information
+     * in the heap dump by extending WeakReferenceWithRunnable.
+     */
+    public static void onCleanup(WeakReferenceWithRunnable weakref) {
+        references.add(weakref);
     }
 
-    static class PhantomReferenceWithRunnable extends PhantomReference {
+    /**
+     * This class can be extended to provide more meta information to the method onCleanup.
+     */
+    public static class WeakReferenceWithRunnable extends WeakReference {
         Runnable r = null;
-        PhantomReferenceWithRunnable(Object ref, ReferenceQueue queue, Runnable r) {
-            super(ref,queue);
+        WeakReferenceWithRunnable(Object ref, ReferenceQueue queue, Runnable r) {
+            super(ref, queue);
             this.r = r;
         }
-
     }
 }
