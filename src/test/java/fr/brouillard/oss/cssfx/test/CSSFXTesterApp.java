@@ -20,8 +20,13 @@ package fr.brouillard.oss.cssfx.test;
  * #L%
  */
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.function.*;
+import java.util.logging.Level;
 
+import fr.brouillard.oss.cssfx.impl.log.CSSFXLogger;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventType;
@@ -38,6 +43,8 @@ import javafx.stage.Stage;
 
 import javafx.stage.WindowEvent;
 import fr.brouillard.oss.cssfx.CSSFX;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CSSFXTesterApp extends Application {
     private Button btnLoadOddCSS;   // needed as field for tests purposes
@@ -46,6 +53,53 @@ public class CSSFXTesterApp extends Application {
     public void start(Stage stage) throws Exception {
         fillStage(stage);
         stage.show();
+
+        CSSFXLogger.LoggerFactory cssfxToSlf4jLoggerFactory = (loggerName) -> (level, message, args) -> {
+            Logger slf4jLogger = LoggerFactory.getLogger(loggerName);
+            Consumer<String> logMethod;
+            BiConsumer<String, Throwable> logWithThrowableMethod;
+
+            BooleanSupplier isActiveLevelMethod;
+            switch (level) {
+                case INFO:
+                    logMethod = slf4jLogger::info;
+                    logWithThrowableMethod = slf4jLogger::info;
+                    isActiveLevelMethod = slf4jLogger::isInfoEnabled;
+                    break;
+                case ERROR:
+                    logMethod = slf4jLogger::error;
+                    logWithThrowableMethod = slf4jLogger::error;
+                    isActiveLevelMethod = slf4jLogger::isErrorEnabled;
+                    break;
+                case WARN:
+                    logMethod = slf4jLogger::warn;
+                    logWithThrowableMethod = slf4jLogger::warn;
+                    isActiveLevelMethod = slf4jLogger::isWarnEnabled;
+                    break;
+                case DEBUG:
+                    logMethod = slf4jLogger::debug;
+                    logWithThrowableMethod = slf4jLogger::debug;
+                    isActiveLevelMethod = slf4jLogger::isDebugEnabled;
+                    break;
+                case NONE:
+                default:
+                    logMethod = (m) -> {};
+                    logWithThrowableMethod = (m,t) -> {};
+                    isActiveLevelMethod = () -> false;
+            };
+
+            if (isActiveLevelMethod.getAsBoolean()) {
+                // we are allowed to log at the desired level
+                String formattedMessage = String.format(message, args);
+                if (args.length > 0 && Throwable.class.isAssignableFrom(args[args.length-1].getClass())) {
+                    Throwable t = (Throwable) args[args.length-1];
+                    logWithThrowableMethod.accept(formattedMessage, t);
+                } else {
+                    logMethod.accept(formattedMessage);
+                }
+            }
+        };
+        CSSFXLogger.setLoggerFactory(cssfxToSlf4jLoggerFactory);
         Runnable cssfxCloseAction = CSSFX.start();
 
         stage.getScene().getWindow()
